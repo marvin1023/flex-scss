@@ -69,7 +69,7 @@ $prefixNo:                    true !default;
   }
 }
 
-// prefixer-value 和 prefixer 定义于sassCore的[css3](https://github.com/marvin1023/sassCore/blob/master/core/_css3.scss)
+// flex-old和flex-mid分别应用与old版本和mid版本
 //-----------------------------------------------------
 @mixin flex-old($property,$value,$propertyPrefix:true){
   @if $flexOld {
