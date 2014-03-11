@@ -1,0 +1,227 @@
+@charset "UTF-8";
+//-----------------------------------------------------
+// css3 flex
+// 三大版本对比：http://www.w3cplus.com/css3/designing-css-layout-with-flexbox.html
+// 标准版使用参考：http://www.w3cplus.com/blog/666.html
+// old版本不支持的有：align-content和align-self两个属性，flex-wrap取值为wrap-reverse，justify-content取值为space-around
+// old版本和middle版本都不支持flex-flow(flex-wrap和flex-direction的缩写)
+// 最后关于伸缩性flex的定义不一样，如只传一个数字单位则可以达到三种语法一致，其余的则不可。
+//-----------------------------------------------------
+
+// 变量
+//-----------------------------------------------------
+// 版本支持
+$flexOld:                     true !default; //09版本 用于兼容移动端，-webkit前缀
+$flexMid:                     true !default; //用于ie10 -ms前缀
+
+// 各个浏览器的属性前缀，true表示开启，false表示不开启
+$prefixForWebkit:             true !default;
+$prefixForMozilla:            true !default;
+$prefixForMicrosoft:          true !default;
+$prefixForOpera:              false !default; //opera从版本15开始转向webkit，所以默认为false，不输出o前缀
+$prefixNo:                    true !default;
+
+
+// prefixer
+// 用于在属性上加前缀
+// 默认这里将只输出webkit前缀和标准（如果要开启opera的可以将$prefixForOpera设置为true）
+//-----------------------------------------------------
+@mixin prefixer($property, $value, $prefixes: o webkit) {
+  @each $prefix in $prefixes {
+    @if $prefix == webkit and $prefixForWebkit == true {
+      -webkit-#{$property}: $value;
+    }
+    @else if $prefix == moz and $prefixForMozilla == true {
+      -moz-#{$property}: $value;
+    }
+    @else if $prefix == ms and $prefixForMicrosoft == true {
+      -ms-#{$property}: $value;
+    }
+    @else if $prefix == o and $prefixForOpera == true {
+      -o-#{$property}: $value;
+    }
+  }
+  @if $prefixNo {
+    #{$property}: $value;
+  }
+}
+
+// prefixer-value
+// 用于在值上加前缀
+// 默认这里将输出webkit前缀，moz前缀和标准
+@mixin prefixer-value($property, $value, $prefixes: webkit moz) {
+  @each $prefix in $prefixes {
+    @if $prefix == webkit and $prefixForWebkit == true {
+      #{$property}: -webkit-#{$value};
+    }
+    @else if $prefix == moz and $prefixForMozilla == true {
+      #{$property}: -moz-#{$value};
+    }
+    @else if $prefix == o and $prefixForMozilla == true {
+      #{$property}: -o-#{$value};
+    }
+    @else if $prefix == ms and $prefixForMicrosoft == true {
+      #{$property}: -ms-#{$value};
+    }
+  }
+  @if $prefixNo {
+    #{$property}: $value;
+  }
+}
+
+// prefixer-value 和 prefixer 定义于sassCore的[css3](https://github.com/marvin1023/sassCore/blob/master/core/_css3.scss)
+//-----------------------------------------------------
+@mixin flex-old($property,$value,$propertyPrefix:true){
+  @if $flexOld {
+    @if $propertyPrefix {
+      -wekit-#{$property} : $value;
+    } @else {
+      #{$property} : -webkit-#{$value};
+    }
+  }
+}
+@mixin flex-mid($property,$value,$propertyPrefix:true){
+  @if $flexMid {
+    @if $propertyPrefix {
+      -ms-#{$property} : $value;
+    } @else {
+      #{$property} : -ms-#{$value};
+    }
+  }
+}
+
+
+//flex
+//-----------------------------------------------------
+@mixin display-flex($flex: flex) {
+  // flex | inline-flex
+  @if $flex == flex  {
+    @include flex-old(display,box,false);
+    @include flex-mid(display,flexbox,false);
+  }
+  @if $flex == inline-flex {
+    @include flex-old(display,inline-box,false);
+    @include flex-mid(display,inline-flexbox,false);
+  }
+  @include prefixer-value(display,$flex);
+}
+
+@mixin flex-direction($direction: column){
+  // row | row-reverse | column | column-reverse
+  @if $direction == row {
+    @include flex-old(box-orient,horizontal);
+  }
+  @if $direction == column {
+    @include flex-old(box-orient,vertical);
+  }
+  @if $direction == row-reverse {
+    @include flex-old(box-orient,horizontal);
+    @include flex-old(box-direction,reverse);
+  }
+  @if $direction == column-reverse {
+    @include flex-old(box-orient,vertical);
+    @include flex-old(box-direction,reverse);
+  }
+  @include flex-mid(flex-direction, $direction);
+  @include prefixer(flex-direction, $direction, webkit moz);
+}
+
+@mixin flex-wrap($wrap: wrap){
+  // nowrap | wrap | wrap-reverse
+  // old版本不支持wrap-reverse
+  @if $wrap == wrap {
+    @include flex-old(box-lines, multiple);
+  }
+  @if $wrap == nowrap {
+    @include flex-old(box-lines, single);
+  }
+  @include flex-mid(flex-wrap, $wrap);
+  @include prefixer(flex-wrap, $wrap, webkit moz);
+}
+
+// flex-flow is a shorthand for flex-direction and flex-wrap
+@mixin flex-flow($flow: row wrap){
+  // direction || wrap
+  @include prefixer(flex-flow, $flow, webkit moz);
+}
+
+@mixin order($num: -1){
+  @include flex-old(box-ordinal-group,$num);
+  @include flex-mid(flex-order,$num);
+  @include prefixer(order, $num, webkit moz);
+}
+
+@mixin justify-content($align: space-between){
+  // flex-start | flex-end | center | space-between | space-around
+  @if $align == flex-start {
+    @include flex-old(box-pack,start);
+    @include flex-mid(flex-pack,start);
+  } @else if $align == flex-end {
+    @include flex-old(box-pack,end);
+    @include flex-mid(flex-pack,end);
+  } @else if $align == space-between {
+    @include flex-old(box-pack,justify);
+    @include flex-mid(flex-pack,justify);
+  } @else if $align == space-around {
+    @include flex-mid(flex-pack,distribute);
+  } @else {
+    @include flex-old(box-pack,$align);
+    @include flex-mid(flex-pack,$align);
+  }
+  @include prefixer(justify-content, $align, webkit moz);
+}
+
+@mixin align-items($align: center){
+  // flex-start | flex-end | center | baseline | stretch
+  @if $align == flex-start {
+    @include flex-old(box-align,start);
+    @include flex-mid(flex-align,start);
+  } @else if $align == flex-end {
+    @include flex-old(box-align,end);
+    @include flex-mid(flex-align,end);
+  } @else {
+    @include flex-old(box-align,$align);
+    @include flex-mid(flex-align,$align);
+  }
+  @include prefixer(align-items, $align, webkit moz);
+}
+
+@mixin align-content($align: flex-start){
+  // stretch | flex-start | flex-end | center | space-between | space-around
+  // old不支持
+  @if $align == flex-start {
+    @include flex-mid(flex-line-pack,start);
+  } @else if $align == flex-end {
+    @include flex-mid(flex-line-pack,end);
+  } @else if $align == space-between {
+    @include flex-mid(flex-line-pack,justify);
+  } @else if $align == space-around {
+    @include flex-mid(flex-line-pack,distribute);
+  } @else {
+    @include flex-mid(flex-line-pack,$align);
+  }
+  @include prefixer(align-content, $align, webkit moz);
+}
+
+@mixin align-self($align: flex-start){
+  // auto | flex-start | flex-end | center | baseline | stretch
+  // old不支持
+  @if $align == flex-start {
+    @include flex-mid(flex-item-align,start);
+  } @else if $align == flex-end {
+    @include flex-mid(flex-item-align,end);
+  } @else {
+    @include flex-mid(flex-item-align,$align);
+  }
+  @include prefixer(align-self, $align, webkit moz);
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/CSS/flex
+@mixin flex($arg){
+  //initial | auto | none | number
+  // 只传入数字则三大版本都支持
+  @if type-of($arg) == number {
+    @include flex-old(box-flex,$arg);
+  }
+  @include prefixer(flex, $arg, webkit moz);
+}
