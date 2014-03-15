@@ -223,5 +223,5 @@ $prefixNo:                    true !default;
   @if type-of($arg) == number {
     @include flex-old(box-flex,$arg);
   }
-  @include prefixer(flex, $arg, webkit moz);
+  @include prefixer(flex, $arg, ms webkit moz);
 }
